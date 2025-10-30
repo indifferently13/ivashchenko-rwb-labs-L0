@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>Сервис заказов</title>
+<style>
+:root {
+  --main-color: #68b684;
+  --main-color-light: #a4d4b4;
+  --bg-color: #f6f8f7;
+  --text-color: #222;
+  --radius: 12px;
+  --transition: 0.3s ease;
+}
+
+body {
+  font-family: "Segoe UI", "Roboto", sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+}
+
+header {
+  background: var(--main-color);
+  color: white;
+  text-align: center;
+  padding: 25px 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: 0.5px;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 40px auto;
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  padding: 30px 40px;
+  animation: fadeIn 0.4s ease;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.left-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.right-group {
+  margin-left: auto;
+}
+
+input, button {
+  border: 1px solid #ccc;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 14px;
+  outline: none;
+  transition: var(--transition);
+}
+
+input:focus {
+  border-color: var(--main-color);
+  box-shadow: 0 0 4px rgba(104, 182, 132, 0.4);
+}
+
+button {
+  background-color: var(--main-color);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+button:hover {
+  background-color: #5ba378;
+  transform: translateY(-1px);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 20px;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+th, td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+th {
+  background: var(--main-color-light);
+  color: #033f2c;
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: #f5fbf7;
+  transition: 0.2s ease;
+}
+
+#result p {
+  text-align: center;
+  color: #666;
+  margin: 30px 0;
+}
+
+footer {
+  text-align: center;
+  padding: 20px 10px;
+  color: #555;
+  font-size: 14px;
+  background: white;
+  border-top: 1px solid #eee;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 700px) {
+  .container { padding: 20px; }
+  .actions { flex-direction: column; align-items: stretch; }
+  .left-group, .right-group { width: 100%; justify-content: center; }
+  button, input { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Сервис заказов</h1>
+</header>
+
+<div class="container">
+  <div class="actions">
+    <div class="left-group">
+      <input type="text" id="orderId" placeholder="Введите ID заказа...">
+      <button id="showBtn">Показать</button>
+      <button id="showAllBtn">Показать все</button>
+    </div>
+    <div class="right-group">
+      <button id="addBtn">➕ Добавить заказ</button>
+    </div>
+  </div>
+
+  <div id="result"></div>
+</div>
+
+<footer>
+  &copy; 2025 Сервис заказов. Все права защищены.
+</footer>
+
+<script>
+const resultDiv = document.getElementById("result");
+
+document.getElementById("showBtn").onclick = async () => {
+  const id = document.getElementById("orderId").value.trim();
+  if (!id) return alert("Введите ID заказа");
+  const res = await fetch(`/orders/${id}`);
+  if (!res.ok) return alert("Заказ не найден");
+  const data = await res.json();
+  renderOrders([data]);
+};
+
+document.getElementById("showAllBtn").onclick = loadAll;
+
+document.getElementById("addBtn").onclick = () => {
+  window.location.href = "/add.html";
+};
+
+async function loadAll() {
+  const res = await fetch("/api/orders");
+  const data = await res.json();
+  renderOrders(data);
+}
+
+function renderOrders(orders) {
+  if (!orders || orders.length === 0) {
+    resultDiv.innerHTML = "<p>Ничего не найдено.</p>";
+    return;
+  }
+
+  let html = `<table>
+    <tr>
+      <th>ID</th>
+      <th>Имя покупателя</th>
+      <th>Город</th>
+      <th>Сумма</th>
+      <th>Товары</th>
+    </tr>`;
+
+  for (const o of orders) {
+    const items = o.items.map(it => `${it.name} (${it.price}₽)`).join(", ");
+    html += `<tr>
+      <td>${o.order_uid}</td>
+      <td>${o.delivery.name}</td>
+      <td>${o.delivery.city}</td>
+      <td>${o.payment.amount}</td>
+      <td>${items}</td>
+    </tr>`;
+  }
+
+  html += `</table>`;
+  resultDiv.innerHTML = html;
+}
+
+window.onload = loadAll;
+</script>
+</body>
+</html>
