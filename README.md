@@ -4,7 +4,8 @@
 
 ### 1. Клонировать репозиторий
 ```bash
-
+git clone https://github.com/indifferently13/ivashchenko-rwb-labs-L0.git
+cd .\ivashchenko-rwb-labs-L0
 ```
 
 ### 2. Собрать и запустить контейнеры
