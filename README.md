@@ -17,3 +17,5 @@ docker-compose up --build
 http://localhost:8888
 
 ## Демонстрация
+https://github.com/user-attachments/assets/ff8c733c-6ab4-41c7-80ec-4adbcabb2268
+
